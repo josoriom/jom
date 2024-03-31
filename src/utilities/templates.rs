@@ -5,6 +5,7 @@ use termion::raw::IntoRawMode;
 
 use crate::main_menu;
 use crate::{print_color, Color};
+
 struct TemplateItem {
     name: String,
     color: Color,
@@ -68,25 +69,30 @@ fn execute_action(template: &TemplateItem) {
 }
 
 fn display_templates(
-    stdout: &mut io::Stdout,
-    dependencies: &Vec<TemplateItem>,
+    stdout: &mut dyn std::io::Write,
+    templates: &Vec<TemplateItem>,
     cursor_position: usize,
-) {
-    write!(stdout, "{}", termion::cursor::Hide).unwrap();
-    write!(stdout, "{}", termion::cursor::Goto(1, 2)).unwrap();
-    write!(
+) -> std::io::Result<()> {
+    print_color(stdout, &termion::clear::All.to_string(), &Color::Yellow)?; // Clear terminal screen
+    print_color(
         stdout,
-        "Select the template by using the arrow keys and pressing Enter. \r\n"
-    )
-    .unwrap();
-    for (index, dependency) in dependencies.iter().enumerate() {
+        &termion::cursor::Goto(1, 2).to_string(),
+        &Color::Yellow,
+    )?; // Move cursor to position (1, 2)
+    print_color(
+        stdout,
+        "Select the template by using the arrow keys and pressing Enter. \r\n",
+        &Color::Yellow,
+    )?;
+    for (index, template) in templates.iter().enumerate() {
         if index == cursor_position {
-            write!(stdout, "> ").unwrap();
+            print_color(stdout, "> ", &template.color)?;
         } else {
-            write!(stdout, "  ").unwrap();
+            print_color(stdout, "  ", &template.color)?;
         }
-        write!(stdout, "{}\r\n", dependency.name).unwrap();
+        print_color(stdout, &format!("{}\r\n", template.name), &template.color)?;
     }
-    write!(stdout, "To exit, type Q or ESC. \r\n ").unwrap();
-    stdout.flush().unwrap();
+    print_color(stdout, "To exit, type Q or ESC. \r\n ", &Color::Yellow)?;
+    stdout.flush()?;
+    Ok(())
 }
