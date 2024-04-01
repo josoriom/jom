@@ -4,10 +4,10 @@ use termion::input::TermRead;
 use termion::raw::IntoRawMode;
 
 use crate::{
-    dependencies, distributions_data, main_menu,
+    dependencies, main_menu,
     utilities::{
         color::{print_color, Color},
-        distributions_data::OperatingSystem,
+        data::OperatingSystem,
     },
 };
 
@@ -26,7 +26,7 @@ impl MenuItem {
 }
 
 pub fn dependencies_action() {
-    let actions = vec!["install", "uninstall", "check"];
+    let actions = vec!["install", "uninstall"];
     let mut options = Vec::new();
     for name in actions {
         options.push(MenuItem::new(name, false));
@@ -75,7 +75,6 @@ pub fn dependencies_action() {
 }
 
 fn execute_action(choice: &mut MenuItem) {
-    print!("{}", choice.name);
     dependencies(&choice.name, OperatingSystem::Debian)
 }
 
@@ -97,13 +96,4 @@ fn display_actions(stdout: &mut io::Stdout, dependencies: &Vec<MenuItem>, cursor
     }
     write!(stdout, "To exit, type Q or ESC").unwrap();
     stdout.flush().unwrap();
-}
-
-fn get_operating_system() -> String {
-    match std::env::consts::OS {
-        "linux" => "Linux".to_string(),
-        "macos" => "macOS".to_string(),
-        "windows" => "Windows".to_string(),
-        _ => "Unknown".to_string(),
-    }
 }

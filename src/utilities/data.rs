@@ -1,25 +1,42 @@
-use std::collections::HashMap;
-
 pub enum OperatingSystem {
     Debian,
     // Add other OS variants as needed
 }
 
-struct DependenciesActions {
+pub struct DependenciesActions {
     install: Vec<String>,
     uninstall: Vec<String>,
 }
 
-pub enum Dependencies {}
+impl DependenciesActions {
+    pub fn get(&self, action: &str) -> Option<&Vec<String>>{
+        match action {
+            "install" => Some(&self.install),
+            "uninstall" => Some(&self.uninstall),
+            _ => None,
+        }
+    }
+}
 
 pub struct AvailableDependencies {
     fish: DependenciesActions,
     git: DependenciesActions,
     htop: DependenciesActions,
     npm: DependenciesActions,
-    python3: DependenciesActions,
-    pip3: DependenciesActions,
-    R: DependenciesActions,
+    r: DependenciesActions,
+}
+
+impl AvailableDependencies {
+    pub fn get(&self, dependency: &str) -> Option<&DependenciesActions> {
+        match dependency {
+            "fish" => Some(&self.fish),
+            "git" => Some(&self.git),
+            "htop" => Some(&self.htop),
+            "npm" => Some(&self.npm),
+            "R" => Some(&self.r),
+            _ => None
+        }
+    }
 }
 
 impl AvailableDependencies {
@@ -42,27 +59,11 @@ impl AvailableDependencies {
                     install: vec!["sudo apt install -y npm".to_string()],
                     uninstall: vec!["sudo apt remove -y npm".to_string()],
                 },
-                python3: DependenciesActions {
-                    install: vec!["sudo apt install -y python3".to_string()],
-                    uninstall: vec!["sudo apt remove -y python3.11 python3.11-minimal".to_string()],
-                },
-                pip3: DependenciesActions {
-                    install: vec!["sudo apt install -y pip3".to_string()],
-                    uninstall: vec!["sudo apt remove -y pip3".to_string()],
-                },
-                R: DependenciesActions {
+                r: DependenciesActions {
                     install: vec!["sudo apt install -y r-base".to_string()],
                     uninstall: vec!["sudo apt remove -y r-base".to_string()],
                 },
             }),
         }
     }
-}
-
-pub fn list_available_dist() {
-    if let Some(datum) = AvailableDependencies::for_distribution(OperatingSystem::Debian) {
-        if let Some(otherDatum) = datum["fish"] {
-            println!("{}", otherDatum[])
-        }
-    };
 }

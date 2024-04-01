@@ -3,7 +3,6 @@ use termion::event::Key;
 use termion::input::TermRead;
 use termion::raw::IntoRawMode;
 
-use crate::dependencies;
 use crate::dependencies_action;
 use crate::templates;
 struct MainMenuOption {

@@ -1,5 +1,4 @@
 use std::{
-    fs,
     io::{self, Write},
     process::Command,
 };
@@ -8,13 +7,11 @@ use termion::input::TermRead;
 use termion::raw::IntoRawMode;
 
 use crate::{
-    distributions_data::OperatingSystem,
+    OperatingSystem,
     main_menu,
-    utilities::{
-        color::{print_color, Color},
-        dependencies,
-        distributions_data::AvailableDependencies,
-    },
+    print_color,
+    Color,
+    AvailableDependencies,
 };
 
 #[derive(Debug)]
@@ -28,14 +25,14 @@ impl MenuItem {
     fn new(name: &str, color: Color) -> MenuItem {
         MenuItem {
             name: name.to_string(),
-            selected: true,
+            selected: false,
             color,
         }
     }
 }
-
-pub fn dependencies(choosen_action: &str, os: OperatingSystem) {
-    let dependencies_names = vec!["fish", "git", "htop", "npm", "python3", "pip3", "R"];
+// TODO: check the OS and distribution
+pub fn dependencies(choosen_action: &str, _os: OperatingSystem) {
+    let dependencies_names = vec!["fish", "git", "htop", "npm", "R"];
     let mut dependencies = Vec::new();
 
     // Display the dependency status with Red and Green
@@ -78,7 +75,6 @@ pub fn dependencies(choosen_action: &str, os: OperatingSystem) {
             }
             Key::Char('\n') => {
                 execute_action(
-                    &mut stdout,
                     OperatingSystem::Debian,
                     &dependencies,
                     choosen_action,
@@ -96,20 +92,41 @@ pub fn dependencies(choosen_action: &str, os: OperatingSystem) {
 }
 
 fn execute_action(
-    stdout: &mut io::Stdout,
-    os: OperatingSystem,
+    _os: OperatingSystem,
     dependencies: &Vec<MenuItem>,
     choosen_action: &str,
 ) {
-    println!("Selected Dependencies: \r\n");
-    for item in dependencies {
-        // println!("Menu Items: {:?}", *item);
-        if item.selected {
-            print!("{:?}", item);
-        }
-    }
-    if let Some(dependencies_list) = AvailableDependencies::for_distribution(os) {}
+    if let Some(datum) = AvailableDependencies::for_distribution(OperatingSystem::Debian) {
+        for item in dependencies {
+            if item.selected {
+                if let Some(other_datum) = datum.get(&item.name) {
+                    if let Some(result) = other_datum.get(choosen_action) {
+                        for element in result {
+                            let _ = execute_bash(&item.name.to_string(), &element);
+                        }
+                    }
+                }
+            }
+        };
+    };
 }
+
+fn execute_bash(name: &str,instruction: &str) -> Result<(), String> {
+    let mut command = Command::new("bash");
+    command.arg("-c").arg(instruction);
+    match command.status() {
+        Ok(exit_status) => {
+            if exit_status.success() {
+                println!("Command {} executed successfully!", name);
+                Ok(())
+            } else {
+                Err(format!("Execution failed with error code: {:?}", exit_status.code()))
+            }
+        },
+        Err(err) => Err(format!("Failed to execute command: {}", err)),
+    }
+}
+
 
 fn display_dependencies(
     stdout: &mut io::Stdout,
