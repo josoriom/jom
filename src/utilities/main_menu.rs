@@ -4,6 +4,7 @@ use termion::input::TermRead;
 use termion::raw::IntoRawMode;
 
 use crate::dependencies;
+use crate::dependencies_action;
 use crate::templates;
 struct MainMenuOption {
     name: String,
@@ -56,7 +57,7 @@ pub fn main_menu() {
 
 fn execute_action(template: &MainMenuOption) {
     if template.name == "Dependencies" {
-        dependencies();
+        dependencies_action();
     } else {
         templates();
     }

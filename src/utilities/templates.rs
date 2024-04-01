@@ -35,7 +35,7 @@ pub fn templates() {
     write!(stdout, "{}", termion::clear::All).unwrap();
     stdout.flush().unwrap();
 
-    display_templates(&mut stdout, &templates, cursor_position);
+    let _ = display_templates(&mut stdout, &templates, cursor_position);
 
     for key in stdin.keys() {
         match key.unwrap() {
@@ -60,7 +60,7 @@ pub fn templates() {
             }
             _ => {}
         }
-        display_templates(&mut stdout, &templates, cursor_position);
+        let _ = display_templates(&mut stdout, &templates, cursor_position);
     }
 }
 
@@ -73,16 +73,16 @@ fn display_templates(
     templates: &Vec<TemplateItem>,
     cursor_position: usize,
 ) -> std::io::Result<()> {
-    print_color(stdout, &termion::clear::All.to_string(), &Color::Yellow)?; // Clear terminal screen
+    print_color(stdout, &termion::clear::All.to_string(), &Color::Yellow)?;
     print_color(
         stdout,
         &termion::cursor::Goto(1, 2).to_string(),
-        &Color::Yellow,
-    )?; // Move cursor to position (1, 2)
+        &Color::White,
+    )?;
     print_color(
         stdout,
-        "Select the template by using the arrow keys and pressing Enter. \r\n",
-        &Color::Yellow,
+        "Select the template by using the arrow keys and pressing Enter\r\n",
+        &Color::White,
     )?;
     for (index, template) in templates.iter().enumerate() {
         if index == cursor_position {
@@ -92,7 +92,16 @@ fn display_templates(
         }
         print_color(stdout, &format!("{}\r\n", template.name), &template.color)?;
     }
-    print_color(stdout, "To exit, type Q or ESC. \r\n ", &Color::Yellow)?;
+    print_color(
+        stdout,
+        "To return to the main menu, press the Backspace\r\n",
+        &Color::Red,
+    )?;
+    print_color(
+        stdout,
+        "To exit, press the Q or ESC key.\r\n",
+        &Color::White,
+    )?;
     stdout.flush()?;
     Ok(())
 }

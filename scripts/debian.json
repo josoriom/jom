@@ -1,0 +1,33 @@
+{
+    "debian": {
+        "fish": {
+            "install": ["sudo apt install -y fish"],
+            "uninstall": ["sudo apt remove -y fish"]
+        },
+        "git": {
+            "install": ["sudo apt install -y git"],
+            "uninstall": ["sudo apt remove -y git"]
+        },
+        "htop": {
+            "install": ["sudo apt install -y htop"],
+            "uninstall": ["sudo apt remove -y htop"]
+        },
+        "npm": {
+            "install": ["sudo apt install -y npm"],
+            "uninstall": ["sudo apt remove -y npm"]
+        },
+        "python3": {
+            "install": ["sudo apt install -y python3"],
+            "uninstall": ["sudo apt remove -y python3.11 python3.11-minimal"]
+        },
+        "pip3": {
+            "install": ["sudo apt install -y pip3"],
+            "uninstall": ["sudo apt remove -y pip3"]
+        },
+        "R": {
+            "install": ["sudo apt install -y r-base"],
+            "uninstall": ["sudo apt remove -y r-base"]
+        }
+    },
+    "fedora": {}
+}
