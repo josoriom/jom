@@ -32,10 +32,9 @@ impl MenuItem {
 }
 // TODO: check the OS and distribution
 pub fn dependencies(choosen_action: &str, _os: OperatingSystem) {
-    let dependencies_names = vec!["fish", "git", "htop", "npm", "R"];
+    let dependencies_names = vec!["google-chrome", "code", "curl", "fish", "git", "htop", "npm", "R"];
     let mut dependencies = Vec::new();
 
-    // Display the dependency status with Red and Green
     for name in dependencies_names {
         dependencies.push(MenuItem::new(
             name,
@@ -54,7 +53,7 @@ pub fn dependencies(choosen_action: &str, _os: OperatingSystem) {
     write!(stdout, "{}", termion::clear::All).unwrap();
     stdout.flush().unwrap();
 
-    display_dependencies(&mut stdout, &dependencies, cursor_position);
+    display_dependencies(&mut stdout, &choosen_action, &dependencies, cursor_position);
     for c in stdin.keys() {
         match c.unwrap() {
             Key::Char('q') | Key::Esc | Key::Ctrl('c') => break,
@@ -87,7 +86,7 @@ pub fn dependencies(choosen_action: &str, _os: OperatingSystem) {
             }
             _ => {}
         }
-        display_dependencies(&mut stdout, &dependencies, cursor_position);
+        display_dependencies(&mut stdout, &choosen_action, &dependencies, cursor_position);
     }
 }
 
@@ -123,13 +122,14 @@ fn execute_bash(name: &str,instruction: &str) -> Result<(), String> {
                 Err(format!("Execution failed with error code: {:?}", exit_status.code()))
             }
         },
-        Err(err) => Err(format!("Failed to execute command: {}", err)),
+        Err(err) => Err(format!("Failed to execute command: {}\r\n", err)),
     }
 }
 
 
 fn display_dependencies(
     stdout: &mut io::Stdout,
+    choosen_action: &str,
     dependencies: &Vec<MenuItem>,
     cursor_position: usize,
 ) {
@@ -137,7 +137,8 @@ fn display_dependencies(
     write!(stdout, "{}", termion::cursor::Goto(1, 2)).unwrap();
     write!(
         stdout,
-        "Select the dependencies by using the arrow keys and pressing Space, to finish press Enter. \r\n"
+        "Select the dependencies to {} by using the arrow keys and pressing Space, to finish press Enter. \r\n",
+        choosen_action
     )
     .unwrap();
     for (index, dependency) in dependencies.iter().enumerate() {
@@ -156,7 +157,7 @@ fn display_dependencies(
             &dependency.color,
         );
     }
-    write!(stdout, "To exit, type Q or ESC").unwrap();
+    write!(stdout, "To exit, type Q or ESC \r\n").unwrap();
     stdout.flush().unwrap();
 }
 
