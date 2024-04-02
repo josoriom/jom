@@ -4,7 +4,7 @@ use termion::input::TermRead;
 use termion::raw::IntoRawMode;
 
 use crate::{
-    dependencies, main_menu,
+    dependencies, home,
     utilities::{
         color::{print_color, Color},
         data::OperatingSystem,
@@ -35,51 +35,58 @@ pub fn dependencies_action() {
     let stdin = io::stdin();
     let mut stdout = io::stdout().into_raw_mode().unwrap();
     let mut cursor_position = 0;
-
     write!(stdout, "{}", termion::clear::All).unwrap();
-    stdout.flush().unwrap();
+    draw(&mut stdout, &options, cursor_position);
+    action_controller(stdin, &mut stdout, &mut options, &mut cursor_position);
+    write!(stdout, "{}", termion::cursor::Show).unwrap();
+}
 
-    display_actions(&mut stdout, &options, cursor_position);
+fn action_controller(
+    stdin: io::Stdin,
+    stdout: &mut io::Stdout,
+    options: &mut Vec<MenuItem>,
+    cursor_position: &mut usize,
+) {
     for c in stdin.keys() {
         match c.unwrap() {
             Key::Char('q') | Key::Esc | Key::Ctrl('c') => break,
             Key::Up => {
-                if cursor_position > 0 {
-                    cursor_position -= 1;
+                if *cursor_position > 0 {
+                    *cursor_position -= 1;
                 }
             }
             Key::Down => {
-                if cursor_position < options.len() - 1 {
-                    cursor_position += 1;
+                if *cursor_position < options.len() - 1 {
+                    *cursor_position += 1;
                 }
             }
             Key::Char(' ') => {
-                if let Some(dependency) = options.get_mut(cursor_position) {
+                if let Some(dependency) = options.get_mut(*cursor_position) {
                     dependency.selected = !dependency.selected;
                 }
             }
             Key::Char('\n') => {
-                if let Some(dependency) = options.get_mut(cursor_position) {
-                    execute_action(dependency)
+                if let Some(dependency) = options.get_mut(*cursor_position) {
+                    execute(dependency);
                 }
                 break;
             }
             Key::Backspace => {
-                main_menu();
+                home();
                 break;
             }
             _ => {}
         }
-        display_actions(&mut stdout, &options, cursor_position);
+        draw(stdout, options, *cursor_position);
     }
-    write!(stdout, "{}", termion::cursor::Show).unwrap();
 }
 
-fn execute_action(choice: &mut MenuItem) {
+
+fn execute(choice: &mut MenuItem) {
     dependencies(&choice.name, OperatingSystem::Debian)
 }
 
-fn display_actions(stdout: &mut io::Stdout, dependencies: &Vec<MenuItem>, cursor_position: usize) {
+fn draw(stdout: &mut io::Stdout, dependencies: &Vec<MenuItem>, cursor_position: usize) {
     write!(stdout, "{}", termion::cursor::Hide).unwrap();
     write!(stdout, "{}", termion::cursor::Goto(1, 2)).unwrap();
     write!(

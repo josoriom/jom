@@ -103,7 +103,12 @@ impl AvailableDependencies {
                 },
                 r: DependenciesActions {
                     install: vec!["sudo apt install -y r-base".to_string()],
-                    uninstall: vec!["sudo apt remove -y r-base".to_string()],
+                    uninstall: vec![
+                        "sudo apt remove -y r-base".to_string(),
+                        "sudo apt-get -y purge r-base".to_string(),
+                        "sudo apt-get -y autoremove".to_string(),
+                        "sudo rm -rf /usr/lib/R".to_string()
+                    ],
                 },
             }),
         }

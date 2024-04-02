@@ -1,16 +1,17 @@
 mod utilities;
+mod interface;
 
 use utilities::{
     AvailableDependencies,
     Color,
     OperatingSystem,
-    dependencies,
-    dependencies_action,
     print_color,
-    main_menu,
-    templates
+    is_command_available,
+    execute_bash
 };
 
+use interface::{ dependencies, dependencies_action, home, templates };
+
 fn main() {
-    main_menu();
+    home();
 }

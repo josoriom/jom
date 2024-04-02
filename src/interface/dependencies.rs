@@ -1,20 +1,18 @@
-use std::{
-    io::{self, Write},
-    process::Command,
-};
+use std::io::{self, Write};
 use termion::event::Key;
 use termion::input::TermRead;
 use termion::raw::IntoRawMode;
 
 use crate::{
     OperatingSystem,
-    main_menu,
+    home,
     print_color,
     Color,
     AvailableDependencies,
+    is_command_available,
+    execute_bash
 };
 
-#[derive(Debug)]
 struct MenuItem {
     name: String,
     selected: bool,
@@ -30,9 +28,11 @@ impl MenuItem {
         }
     }
 }
-// TODO: check the OS and distribution
-pub fn dependencies(choosen_action: &str, _os: OperatingSystem) {
-    let dependencies_names = vec!["google-chrome", "code", "curl", "fish", "git", "htop", "npm", "R"];
+
+fn initialize_dependencies() -> Vec<MenuItem> {
+    let dependencies_names = vec![
+        "google-chrome", "code", "curl", "fish", "git", "htop", "npm", "R"
+    ];
     let mut dependencies = Vec::new();
 
     for name in dependencies_names {
@@ -46,52 +46,63 @@ pub fn dependencies(choosen_action: &str, _os: OperatingSystem) {
         ));
     }
 
+    dependencies
+}
+// TODO: check the OS and distribution
+pub fn dependencies(choosen_action: &str, _os: OperatingSystem) {
+    let mut dependencies = initialize_dependencies();
+
     let stdin = io::stdin();
     let mut stdout = io::stdout().into_raw_mode().unwrap();
     let mut cursor_position = 0;
-
     write!(stdout, "{}", termion::clear::All).unwrap();
     stdout.flush().unwrap();
+    draw(&mut stdout, &choosen_action, &dependencies, cursor_position);
+    action_controller(stdin, &mut stdout, &mut dependencies, choosen_action, &mut cursor_position);
+    write!(stdout, "{}", termion::cursor::Show).unwrap();
+}
 
-    display_dependencies(&mut stdout, &choosen_action, &dependencies, cursor_position);
+fn action_controller(
+    stdin: io::Stdin,
+    stdout: &mut io::Stdout,
+    dependencies: &mut Vec<MenuItem>,
+    choosen_action: &str,
+    cursor_position: &mut usize,
+) {
     for c in stdin.keys() {
         match c.unwrap() {
             Key::Char('q') | Key::Esc | Key::Ctrl('c') => break,
             Key::Up => {
-                if cursor_position > 0 {
-                    cursor_position -= 1;
+                if *cursor_position > 0 {
+                    *cursor_position -= 1;
                 }
             }
             Key::Down => {
-                if cursor_position < dependencies.len() - 1 {
-                    cursor_position += 1;
+                if *cursor_position < dependencies.len() - 1 {
+                    *cursor_position += 1;
                 }
             }
             Key::Char(' ') => {
-                if let Some(dependency) = dependencies.get_mut(cursor_position) {
+                if let Some(dependency) = dependencies.get_mut(*cursor_position) {
                     dependency.selected = !dependency.selected;
                 }
             }
             Key::Char('\n') => {
-                execute_action(
-                    OperatingSystem::Debian,
-                    &dependencies,
-                    choosen_action,
-                );
+                execute(OperatingSystem::Debian, dependencies, choosen_action);
                 break;
             }
             Key::Backspace => {
-                main_menu();
+                home();
                 break;
             }
             _ => {}
         }
-        display_dependencies(&mut stdout, &choosen_action, &dependencies, cursor_position);
+        draw(stdout, choosen_action, dependencies, *cursor_position);
     }
-    write!(stdout, "{}", termion::cursor::Show).unwrap();
 }
 
-fn execute_action(
+
+fn execute(
     _os: OperatingSystem,
     dependencies: &Vec<MenuItem>,
     choosen_action: &str,
@@ -111,24 +122,7 @@ fn execute_action(
     };
 }
 
-fn execute_bash(name: &str,instruction: &str) -> Result<(), String> {
-    let mut command = Command::new("bash");
-    command.arg("-c").arg(instruction);
-    match command.status() {
-        Ok(exit_status) => {
-            if exit_status.success() {
-                println!("Command {} executed successfully!", name);
-                Ok(())
-            } else {
-                Err(format!("Execution failed with error code: {:?}", exit_status.code()))
-            }
-        },
-        Err(err) => Err(format!("Failed to execute command: {}\r\n", err)),
-    }
-}
-
-
-fn display_dependencies(
+fn draw(
     stdout: &mut io::Stdout,
     choosen_action: &str,
     dependencies: &Vec<MenuItem>,
@@ -160,12 +154,4 @@ fn display_dependencies(
     }
     write!(stdout, "To exit, type Q or ESC \r\n").unwrap();
     stdout.flush().unwrap();
-}
-
-fn is_command_available(command: &str) -> bool {
-    Command::new("which")
-        .arg(command)
-        .output()
-        .map(|output| output.status.success())
-        .unwrap_or(false)
 }

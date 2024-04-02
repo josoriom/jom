@@ -3,7 +3,7 @@ use termion::event::Key;
 use termion::input::TermRead;
 use termion::raw::IntoRawMode;
 
-use crate::main_menu;
+use crate::home;
 use crate::{print_color, Color};
 
 struct TemplateItem {
@@ -55,7 +55,7 @@ pub fn templates() {
                 break;
             }
             Key::Backspace => {
-                main_menu();
+                home();
                 break;
             }
             _ => {}

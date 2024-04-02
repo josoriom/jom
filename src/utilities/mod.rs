@@ -1,14 +1,10 @@
 pub mod data;
-pub mod dependencies;
-pub mod dependencies_action;
 pub mod color;
-pub mod main_menu;
-pub mod templates;
 pub mod get_operating_system;
+pub mod is_command_available;
+pub mod execute_bash;
 
 pub use data::{AvailableDependencies, OperatingSystem};
-pub use dependencies::dependencies;
-pub use dependencies_action::dependencies_action;
 pub use color::{ Color, print_color };
-pub use main_menu::main_menu;
-pub use templates::templates;
+pub use is_command_available::is_command_available;
+pub use execute_bash::execute_bash;

@@ -3,7 +3,7 @@ use termion::event::Key;
 use termion::input::TermRead;
 use termion::raw::IntoRawMode;
 
-use crate::dependencies_action;
+use crate::dependencies_action::dependencies_action;
 use crate::templates;
 struct MainMenuOption {
     name: String,
@@ -17,7 +17,7 @@ impl MainMenuOption {
     }
 }
 
-pub fn main_menu() {
+pub fn home() {
     let main_menu_options = vec![
         MainMenuOption::new("Dependencies"),
         MainMenuOption::new("Templates"),
@@ -25,37 +25,43 @@ pub fn main_menu() {
     let stdin = io::stdin();
     let mut stdout = io::stdout().into_raw_mode().unwrap();
     let mut cursor_position = 0;
-
     write!(stdout, "{}", termion::clear::All).unwrap();
-    stdout.flush().unwrap();
+    draw(&mut stdout, &main_menu_options, cursor_position);
+    action_controller(stdin, &mut stdout, &main_menu_options, &mut cursor_position);
+    write!(stdout, "{}", termion::cursor::Show).unwrap();
+}
 
-    display_main_menu(&mut stdout, &main_menu_options, cursor_position);
-
+fn action_controller(
+    stdin: io::Stdin,
+    stdout: &mut io::Stdout,
+    main_menu_options: &Vec<MainMenuOption>,
+    cursor_position: &mut usize,
+) {
     for key in stdin.keys() {
         match key.unwrap() {
             Key::Char('q') | Key::Esc | Key::Ctrl('c') => break,
             Key::Up => {
-                if cursor_position > 0 {
-                    cursor_position -= 1;
+                if *cursor_position > 0 {
+                    *cursor_position -= 1;
                 }
             }
             Key::Down => {
-                if cursor_position < main_menu_options.len() - 1 {
-                    cursor_position += 1;
+                if *cursor_position < main_menu_options.len() - 1 {
+                    *cursor_position += 1;
                 }
             }
             Key::Char('\n') => {
-                execute_action(&main_menu_options[cursor_position]);
+                execute(&main_menu_options[*cursor_position]);
                 break;
             }
             _ => {}
         }
-        display_main_menu(&mut stdout, &main_menu_options, cursor_position);
+        draw(stdout, main_menu_options, *cursor_position);
+        stdout.flush().unwrap();
     }
-    write!(stdout, "{}", termion::cursor::Show).unwrap();
 }
 
-fn execute_action(template: &MainMenuOption) {
+fn execute(template: &MainMenuOption) {
     if template.name == "Dependencies" {
         dependencies_action();
     } else {
@@ -63,7 +69,7 @@ fn execute_action(template: &MainMenuOption) {
     }
 }
 
-fn display_main_menu(
+fn draw(
     stdout: &mut io::Stdout,
     options: &Vec<MainMenuOption>,
     cursor_position: usize,
