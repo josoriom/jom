@@ -88,6 +88,7 @@ pub fn dependencies(choosen_action: &str, _os: OperatingSystem) {
         }
         display_dependencies(&mut stdout, &choosen_action, &dependencies, cursor_position);
     }
+    write!(stdout, "{}", termion::cursor::Show).unwrap();
 }
 
 fn execute_action(

@@ -72,6 +72,7 @@ pub fn dependencies_action() {
         }
         display_actions(&mut stdout, &options, cursor_position);
     }
+    write!(stdout, "{}", termion::cursor::Show).unwrap();
 }
 
 fn execute_action(choice: &mut MenuItem) {

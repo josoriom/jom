@@ -52,6 +52,7 @@ pub fn main_menu() {
         }
         display_main_menu(&mut stdout, &main_menu_options, cursor_position);
     }
+    write!(stdout, "{}", termion::cursor::Show).unwrap();
 }
 
 fn execute_action(template: &MainMenuOption) {
