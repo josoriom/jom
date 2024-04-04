@@ -5,10 +5,8 @@ use termion::raw::IntoRawMode;
 
 use crate::{
     dependencies, home,
-    utilities::{
-        color::{print_color, Color},
-        data::OperatingSystem,
-    },
+    utilities::color::{print_color, Color},
+    OperatingSystem
 };
 
 struct MenuItem {

@@ -1,27 +1,10 @@
-pub enum OperatingSystem {
-    Debian,
-    // Add other OS variants as needed
-}
+use crate::{ DependenciesActions, OperatingSystem };
 
-pub struct DependenciesActions {
-    install: Vec<String>,
-    uninstall: Vec<String>,
-}
-
-impl DependenciesActions {
-    pub fn get(&self, action: &str) -> Option<&Vec<String>>{
-        match action {
-            "install" => Some(&self.install),
-            "uninstall" => Some(&self.uninstall),
-            _ => None,
-        }
-    }
-}
-
-pub struct AvailableDependencies {
+pub struct DebianDependencies {
     chrome: DependenciesActions,
     code: DependenciesActions,
     curl: DependenciesActions,
+    docker: DependenciesActions,
     fish: DependenciesActions,
     git: DependenciesActions,
     htop: DependenciesActions,
@@ -29,12 +12,13 @@ pub struct AvailableDependencies {
     r: DependenciesActions,
 }
 
-impl AvailableDependencies {
+impl DebianDependencies {
     pub fn get(&self, dependency: &str) -> Option<&DependenciesActions> {
         match dependency {
             "google-chrome" => Some(&self.chrome),
             "code" => Some(&self.code),
             "curl" => Some(&self.curl),
+            "docker" => Some(&self.docker),
             "fish" => Some(&self.fish),
             "git" => Some(&self.git),
             "htop" => Some(&self.htop),
@@ -45,10 +29,10 @@ impl AvailableDependencies {
     }
 }
 
-impl AvailableDependencies {
-    pub fn for_distribution(distribution: OperatingSystem) -> Option<AvailableDependencies> {
+impl DebianDependencies {
+    pub fn for_distribution(distribution: OperatingSystem) -> Option<DebianDependencies> {
         match distribution {
-            OperatingSystem::Debian => Some(AvailableDependencies {
+            OperatingSystem::Debian => Some(DebianDependencies {
                 chrome: DependenciesActions {
                     install: vec![
                         r#"wget "https://dl.google.com/linux/direct/google-chrome-stable_current_amd64.deb" --output-document=chrome.deb"#.to_string(),
@@ -83,6 +67,28 @@ impl AvailableDependencies {
                         "sudo apt remove -y curl".to_string(),
                         "sudo apt purge -y curl".to_string(),
                         "sudo apt-get autoremove".to_string()
+                    ],
+                },
+                docker: DependenciesActions {
+                    install: vec![
+                        "sudo apt install -y apt-transport-https ca-certificates curl gnupg-agent software-properties-common".to_string(),
+                        "curl -fsSL https://download.docker.com/linux/debian/gpg | sudo gpg --dearmor -o /usr/share/keyrings/docker-archive-keyring.gpg".to_string(),
+                        r#"echo \
+                            "deb [arch=amd64 signed-by=/usr/share/keyrings/docker-archive-keyring.gpg] https://download.docker.com/linux/debian \
+                            $(lsb_release -cs) stable" | sudo tee /etc/apt/sources.list.d/docker.list > /dev/null
+                        "#.to_string(),
+                        "sudo apt update".to_string(),
+                        "sudo apt install -y docker-ce docker-ce-cli containerd.io".to_string(),
+                    ],
+                    uninstall: vec![
+                        "sudo systemctl stop docker".to_string(),
+                        "sudo apt remove -y docker-ce docker-ce-cli containerd.io".to_string(),
+                        "sudo rm -rf /var/lib/docker".to_string(),
+                        "sudo rm -rf /etc/docker".to_string(),
+                        "sudo deluser $USER docker".to_string(),
+                        "sudo rm /etc/apt/sources.list.d/docker.list".to_string(),
+                        "sudo rm /usr/share/keyrings/docker-archive-keyring.gpg".to_string(),
+                        "sudo apt-get -y autoremove".to_string()
                     ],
                 },
                 fish: DependenciesActions {

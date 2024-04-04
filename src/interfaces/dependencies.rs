@@ -8,7 +8,7 @@ use crate::{
     home,
     print_color,
     Color,
-    AvailableDependencies,
+    DebianDependencies,
     is_command_available,
     execute_bash
 };
@@ -31,7 +31,7 @@ impl MenuItem {
 
 fn initialize_dependencies() -> Vec<MenuItem> {
     let dependencies_names = vec![
-        "google-chrome", "code", "curl", "fish", "git", "htop", "npm", "R"
+        "google-chrome", "code", "curl", "fish", "git", "htop", "npm", "R", "docker"
     ];
     let mut dependencies = Vec::new();
 
@@ -107,7 +107,7 @@ fn execute(
     dependencies: &Vec<MenuItem>,
     choosen_action: &str,
 ) {
-    if let Some(datum) = AvailableDependencies::for_distribution(OperatingSystem::Debian) {
+    if let Some(datum) = DebianDependencies::for_distribution(OperatingSystem::Debian) {
         for item in dependencies {
             if item.selected {
                 if let Some(other_datum) = datum.get(&item.name) {
