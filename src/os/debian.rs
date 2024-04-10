@@ -10,6 +10,7 @@ pub struct DebianDependencies {
     htop: DependenciesActions,
     npm: DependenciesActions,
     r: DependenciesActions,
+    rstudio: DependenciesActions
 }
 
 impl DebianDependencies {
@@ -24,6 +25,7 @@ impl DebianDependencies {
             "htop" => Some(&self.htop),
             "npm" => Some(&self.npm),
             "R" => Some(&self.r),
+            "rstudio" => Some(&self.rstudio),
             _ => None
         }
     }
@@ -108,12 +110,28 @@ impl DebianDependencies {
                     uninstall: vec!["sudo apt remove -y npm".to_string()],
                 },
                 r: DependenciesActions {
-                    install: vec!["sudo apt install -y r-base".to_string()],
+                    // https://cran.rstudio.com/bin/linux/debian/
+                    install: vec!["sudo apt install -y r-base r-base-dev".to_string()],
                     uninstall: vec![
-                        "sudo apt remove -y r-base".to_string(),
-                        "sudo apt-get -y purge r-base".to_string(),
+                        "sudo apt remove -y r-base r-base-dev".to_string(),
+                        "sudo apt-get -y purge r-base r-base-dev".to_string(),
                         "sudo apt-get -y autoremove".to_string(),
                         "sudo rm -rf /usr/lib/R".to_string()
+                    ],
+                },
+                rstudio: DependenciesActions {
+                    install: vec![
+                        // https://posit.co/download/rstudio-desktop/
+                        "sudo apt update".to_string(),
+                        "wget https://download1.rstudio.org/electron/jammy/amd64/rstudio-2023.12.1-402-amd64.deb --output-document=rstudio.deb".to_string(),
+                        "sudo apt install -y ./rstudio.deb".to_string(),
+                        "sudo rm rstudio.deb".to_string()
+                    ],
+                    uninstall: vec![
+                        "sudo apt remove -y rstudio".to_string(),
+                        "sudo apt-get -y purge rstudio".to_string(),
+                        "sudo apt -y autoremove".to_string(),
+                        "sudo rm -rf ~/.config/rstudio".to_string(),
                     ],
                 },
             }),

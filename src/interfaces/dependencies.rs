@@ -31,7 +31,7 @@ impl MenuItem {
 
 fn initialize_dependencies() -> Vec<MenuItem> {
     let dependencies_names = vec![
-        "google-chrome", "code", "curl", "fish", "git", "htop", "npm", "R", "docker"
+        "google-chrome", "code", "curl", "fish", "git", "htop", "npm", "R", "docker", "rstudio"
     ];
     let mut dependencies = Vec::new();
 
